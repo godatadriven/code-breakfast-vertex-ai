@@ -1,3 +1,4 @@
+import csv
 import datetime
 import random
 from pathlib import Path
@@ -53,15 +54,33 @@ def save_actuals(target_dir: Path, x, y, labels, n_per_label: int):
     target_dir.mkdir(exist_ok=True, parents=True)
 
     i = 0
+
+    results = []
+    labels_and_images = []
+
     for label in labels:
         is_label = y == REVERSE_MAPPING[label]
         images = x[is_label]
-        label_dir = target_dir / "actual"
         images = images[-n_per_label:]
         for image in images:
             image = Image.fromarray(image[:, :].squeeze())
-            image.save(target_dir / f"{i}.jpg")
-            i += 1
+            labels_and_images.append((label, image))
+    random.shuffle(labels_and_images)
+    for i, (label, image) in enumerate(labels_and_images):
+        image.save(target_dir / f"{i}.jpg")
+        results.append(
+            {
+                "i": i,
+                "label": label,
+            }
+        )
+
+    print(results)
+
+    with open("actuals.csv", "w") as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=["i", "label"])
+        writer.writeheader()
+        writer.writerows(results)
 
 
 if __name__ == "__main__":

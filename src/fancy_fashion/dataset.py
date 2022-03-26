@@ -1,17 +1,10 @@
-import datetime
-import random
 from pathlib import Path
 
 from PIL import Image
 from tensorflow.keras.datasets import fashion_mnist
 
-N_TRAIN = 500
-N_TEST = 100
-N_ACTUAL = 50
-TARGET_DIR = Path("data")
-TARGET_DIR.mkdir(exist_ok=True)
 
-TARGET_MAPPING = {
+LABEL_MAPPING = {
     0: "tshirttop",
     1: "trouser",
     2: "pullover",
@@ -23,8 +16,33 @@ TARGET_MAPPING = {
     8: "bag",
     9: "ankle_boot",
 }
-REVERSE_MAPPING = {v: k for k, v in TARGET_MAPPING.items()}
 
+REVERSE_MAPPING = {v: k for k, v in LABEL_MAPPING.items()}
+
+
+def generate_dataset(n_train=500, n_test=100, n_actual=50, output_dir=Path("./data")):
+    (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
+
+    # Confuse others by using test as train images.
+    train_labels = ["shirt", "sneaker", "bag"]
+    test_labels = ["shirt", "sneaker", "bag"]
+    actual_labels = ["shirt", "sneaker", "bag", "dress"]
+
+    for label in train_labels:
+        save_train_test_images(
+            output_dir / "train", x_train, y_train, label, n_train, train_or_test="train"
+        )
+
+    for label in test_labels:
+        save_train_test_images(
+            output_dir / "test", x_test, y_test, label, n_test, train_or_test="test"
+        )
+
+    n_per_actual_label = len(actual_labels) // n_actual
+
+    save_actuals(
+        output_dir / "actuals", x_test, y_test, labels=actual_labels, n_per_label=10
+    )
 
 def save_images(save_dir: Path, images: list, prefix: str = ""):
     save_dir.mkdir(exist_ok=True, parents=True)
@@ -62,28 +80,3 @@ def save_actuals(target_dir: Path, x, y, labels, n_per_label: int):
             image = Image.fromarray(image[:, :].squeeze())
             image.save(target_dir / f"{i}.jpg")
             i += 1
-
-
-if __name__ == "__main__":
-    (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
-
-    # Confuse others by using test as train images.
-    train_labels = ["shirt", "sneaker", "bag"]
-    test_labels = ["shirt", "sneaker", "bag"]
-    actual_labels = ["shirt", "sneaker", "bag", "dress"]
-
-    for label in train_labels:
-        save_train_test_images(
-            TARGET_DIR, x_train, y_train, label, N_TRAIN, train_or_test="train"
-        )
-
-    for label in test_labels:
-        save_train_test_images(
-            TARGET_DIR, x_test, y_test, label, N_TEST, train_or_test="test"
-        )
-
-    n_per_actual_label = len(actual_labels) // N_ACTUAL
-
-    save_actuals(
-        TARGET_DIR / "actuals", x_test, y_test, labels=actual_labels, n_per_label=10
-    )

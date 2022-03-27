@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import tensorflow as tf
 from tensorflow.keras import Model, layers, preprocessing
 from tensorflow.keras.applications import MobileNet
@@ -11,7 +10,9 @@ def train_model(train_data_dir):
     tf.config.run_functions_eagerly(True)
 
     model = build_model()
-    model.compile(optimizer="Adam", loss="categorical_crossentropy", metrics=["accuracy"])
+    model.compile(
+        optimizer="Adam", loss="categorical_crossentropy", metrics=["accuracy"]
+    )
 
     train_data = preprocessing.image_dataset_from_directory(
         train_data_dir, label_mode="categorical", image_size=(128, 128)

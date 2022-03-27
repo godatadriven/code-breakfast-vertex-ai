@@ -3,10 +3,6 @@ ifndef USER_NAME
 	$(error Please provide a user name with building/pushing a Docker image (e.g. make USER_NAME=<your-name> docker-build))
 endif
 
-.PHONY: check
-check: format
-	poetry run pre-commit run --all
-
 .PHONY: docker-init
 docker-init:
 	gcloud auth configure-docker europe-west3-docker.pkg.dev
@@ -23,6 +19,19 @@ docker-run: docker-build
 docker-push: docker-build
 	docker push europe-west3-docker.pkg.dev/gdd-cb-vertex/docker/fancy-fashion-${USER_NAME}
 
-.PHONY: format
-format:
+.PHONY: python-init
+python-init:
+	poetry env use /opt/conda/envs/python3.9/bin/python
+	poetry install
+
+.PHONY: python-format
+python-format:
 	poetry run black .
+
+.PHONY: python-lint
+python-lint:
+	poetry run pre-commit run --all
+
+.PHONY: python-test
+python-test:
+	poetry run pytest

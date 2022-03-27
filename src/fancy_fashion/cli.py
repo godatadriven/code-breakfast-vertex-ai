@@ -5,8 +5,8 @@ import typer
 
 from .model import train_model
 
-
 app = typer.Typer()
+
 
 @app.command()
 def train(train_data_path: Path, model_output_path: Path):

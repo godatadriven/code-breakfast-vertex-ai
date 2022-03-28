@@ -5,12 +5,14 @@ description = ""
 authors = ["Your Name <you@example.com>"]
 
 [tool.poetry.dependencies]
-python = ">=3.7,<3.11"
+python = ">=3.8,<3.11"
 pylint = "^2.12.2"
 click = "^8.0.4"
 tensorflow = "^2.8.0"
 Pillow = "^9.0.1"
 matplotlib = "^3.5.1"
+pandas = "^1.4.1"
+pyarrow = "^7.0.0"
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"

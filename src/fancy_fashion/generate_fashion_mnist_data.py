@@ -1,8 +1,7 @@
-import csv
-import datetime
 import random
 from pathlib import Path
 
+import pandas as pd
 from PIL import Image
 from tensorflow.keras.datasets import fashion_mnist
 
@@ -50,7 +49,7 @@ def save_actual_images(target_dir: Path, x, y, label: str, n_train: int, prefix:
     save_images(label_dir, images[-n_train:], prefix=prefix)
 
 
-def save_actuals(target_dir: Path, x, y, labels, n_per_label: int):
+def save_validation_images(target_dir: Path, x, y, labels, n_per_label: int):
     target_dir.mkdir(exist_ok=True, parents=True)
 
     i = 0
@@ -66,21 +65,19 @@ def save_actuals(target_dir: Path, x, y, labels, n_per_label: int):
             image = Image.fromarray(image[:, :].squeeze())
             labels_and_images.append((label, image))
     random.shuffle(labels_and_images)
+
     for i, (label, image) in enumerate(labels_and_images):
-        image.save(target_dir / f"{i}.jpg")
+        filename = f"{i}.jpg"
+        image.save(target_dir / filename)
         results.append(
             {
-                "i": i,
+                "filename": filename,
                 "label": label,
             }
         )
 
-    print(results)
-
-    with open("actuals.csv", "w") as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=["i", "label"])
-        writer.writeheader()
-        writer.writerows(results)
+    df = pd.DataFrame(results)
+    df.to_parquet("validation.csv")
 
 
 if __name__ == "__main__":
@@ -91,18 +88,18 @@ if __name__ == "__main__":
     test_labels = ["shirt", "sneaker", "bag"]
     actual_labels = ["shirt", "sneaker", "bag", "dress"]
 
-    for label in train_labels:
-        save_train_test_images(
-            TARGET_DIR, x_train, y_train, label, N_TRAIN, train_or_test="train"
-        )
-
-    for label in test_labels:
-        save_train_test_images(
-            TARGET_DIR, x_test, y_test, label, N_TEST, train_or_test="test"
-        )
+    # for label in train_labels:
+    #     save_train_test_images(
+    #         TARGET_DIR, x_train, y_train, label, N_TRAIN, train_or_test="train"
+    #     )
+    #
+    # for label in test_labels:
+    #     save_train_test_images(
+    #         TARGET_DIR, x_test, y_test, label, N_TEST, train_or_test="test"
+    #     )
 
     n_per_actual_label = len(actual_labels) // N_ACTUAL
 
-    save_actuals(
-        TARGET_DIR / "actuals", x_test, y_test, labels=actual_labels, n_per_label=10
+    save_validation_images(
+        TARGET_DIR / "validation", x_test, y_test, labels=actual_labels, n_per_label=10
     )

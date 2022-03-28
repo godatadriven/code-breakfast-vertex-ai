@@ -24,8 +24,8 @@ pylint = "^2.13.1"
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.poetry.scripts]
-fancy-fashion = 'fancy_fashion.cli:app'
+[tool.pylint.'BASIC']
+good-names = 'X,x,y,i,ii'
 
 [tool.pylint.'MESSAGES CONTROL']
 disable = 'missing-module-docstring,import-error'

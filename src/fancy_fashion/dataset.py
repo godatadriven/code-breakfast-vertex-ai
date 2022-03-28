@@ -3,7 +3,6 @@ from pathlib import Path
 from PIL import Image
 from tensorflow.keras.datasets import fashion_mnist
 
-
 LABEL_MAPPING = {
     0: "tshirttop",
     1: "trouser",

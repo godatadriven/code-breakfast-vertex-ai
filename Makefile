@@ -26,7 +26,7 @@ python-init:
 
 .PHONY: python-format
 python-format:
-	poetry run black .
+	poetry run black src tests
 
 .PHONY: python-lint
 python-lint:

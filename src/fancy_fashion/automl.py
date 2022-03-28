@@ -5,18 +5,16 @@ from typing import Iterable
 
 from google.cloud.storage import Client
 
-ML_USE_MAP = {
-    "train": "TRAINING",
-    "test": "TEST"
-}
+ML_USE_MAP = {"train": "TRAINING", "test": "TEST"}
 
 
 @dataclass
 class DatasetItem:
     """Class representing an AutoML dataset item."""
+
     ml_use: str  # How item should be used in the model (should be TRAINING or TEST).
-    url: str     # GCS url to the image (e.g. gs://<bucket>/path/to/image.jpg).
-    label: str   # Label of the image (e.g. bag, sneaker).
+    url: str  # GCS url to the image (e.g. gs://<bucket>/path/to/image.jpg).
+    label: str  # Label of the image (e.g. bag, sneaker).
 
 
 def generate_items_from_bucket(bucket_name: str) -> Iterable[DatasetItem]:
@@ -25,12 +23,12 @@ def generate_items_from_bucket(bucket_name: str) -> Iterable[DatasetItem]:
     client = Client()
 
     for blob in client.list_blobs(bucket_name):
-        if (blob.name.startswith("train") or blob.name.startswith("test")) \
-                and blob.name.endswith(".jpg"):
+        if (
+            blob.name.startswith("train") or blob.name.startswith("test")
+        ) and blob.name.endswith(".jpg"):
             ml_use, label, _ = blob.name.split("/")
             url = f"gs://{bucket_name}/{blob.name}"
             yield DatasetItem(ml_use=ML_USE_MAP[ml_use], url=url, label=label)
-
 
 
 def write_items_to_csv(dataset_items: Iterable[DatasetItem], output_path: Path):

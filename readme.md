@@ -21,28 +21,18 @@ This should open a new tab in your browser with JupyterLab. To set up the code f
 
 ## Exercises
 
-### Exercise 1 - Explore the package
+### Exercise 1 - Run the model locally
 
-Finally, explore our code and see if you can identify what everything does. See if you can answer the following questions:
-* Check out the code in `src`. Can you find where the model is trained?
-* What is the Makefile used for? What do the different commands do?
-* Which tooling is used for checking code quality and formatting our code?
+Open the notebook `notebooks/1-run-local.ipynb` and run through the exercises in the notebook.
 
-### Exercise 2 - Run the model locally
+### Exercise 2 - Run the model in Vertex Pipelines
 
-Open the notebook `notebooks/train-local.ipynb` and run through the exercises in the notebook.
 
-### Exercise 3 - Run the model in Vertex Pipelines
-
-Open the notebook `notebooks/train-pipeline.ipynb` and run through the exercises in the notebook.
-
-### Bonus exercise - Train a model with AutoML
-
-Open the notebook `notebooks/train-automl.ipynb` and run through the exercises in the notebook.
+Open the notebook `notebooks/2-run-pipeline.ipynb` and run through the exercises in the notebook.
 
 ## Deployment
 
-TODO.
+The infrastructure for this code breakfast can be deployed from the corresponding Terraform repository.
 
 ## Contributing
 

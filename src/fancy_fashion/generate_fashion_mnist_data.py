@@ -77,7 +77,7 @@ def save_validation_images(target_dir: Path, x, y, labels, n_per_label: int):
         )
 
     df = pd.DataFrame(results)
-    df.to_parquet("validation.csv")
+    df.to_parquet(TARGET_DIR / "validation.csv")
 
 
 if __name__ == "__main__":
@@ -88,15 +88,15 @@ if __name__ == "__main__":
     test_labels = ["shirt", "sneaker", "bag"]
     actual_labels = ["shirt", "sneaker", "bag", "dress"]
 
-    # for label in train_labels:
-    #     save_train_test_images(
-    #         TARGET_DIR, x_train, y_train, label, N_TRAIN, train_or_test="train"
-    #     )
-    #
-    # for label in test_labels:
-    #     save_train_test_images(
-    #         TARGET_DIR, x_test, y_test, label, N_TEST, train_or_test="test"
-    #     )
+    for label in train_labels:
+        save_train_test_images(
+            TARGET_DIR, x_train, y_train, label, N_TRAIN, train_or_test="train"
+        )
+
+    for label in test_labels:
+        save_train_test_images(
+            TARGET_DIR, x_test, y_test, label, N_TEST, train_or_test="test"
+        )
 
     n_per_actual_label = len(actual_labels) // N_ACTUAL
 

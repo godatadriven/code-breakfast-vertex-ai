@@ -1,4 +1,6 @@
+import csv
 from pathlib import Path
+from typing import Iterable, List
 
 from PIL import Image
 from tensorflow.keras.datasets import fashion_mnist
@@ -29,7 +31,12 @@ def generate_dataset(n_train=500, n_test=100, n_actual=50, output_dir=Path("./da
 
     for label in train_labels:
         save_train_test_images(
-            output_dir / "train", x_train, y_train, label, n_train, train_or_test="train"
+            output_dir / "train",
+            x_train,
+            y_train,
+            label,
+            n_train,
+            train_or_test="train",
         )
 
     for label in test_labels:
@@ -43,7 +50,8 @@ def generate_dataset(n_train=500, n_test=100, n_actual=50, output_dir=Path("./da
         output_dir / "actuals", x_test, y_test, labels=actual_labels, n_per_label=10
     )
 
-def save_images(save_dir: Path, images: list, prefix: str = ""):
+
+def save_images(save_dir: Path, images: List, prefix: str = ""):
     save_dir.mkdir(exist_ok=True, parents=True)
     for ii in range(len(images)):
         image = Image.fromarray(images[ii, :, :].squeeze())
@@ -79,3 +87,47 @@ def save_actuals(target_dir: Path, x, y, labels, n_per_label: int):
             image = Image.fromarray(image[:, :].squeeze())
             image.save(target_dir / f"{i}.jpg")
             i += 1
+
+
+def generate_automl_csv(
+    image_paths: Iterable[Path],
+    output_path: Path,
+    bucket_name: str = "gdd-cb-vertex-fashion-inputs",
+):
+    """
+    Generates a CSV description for Vertex AI's AutoML.
+
+    Parameters
+    ----------
+    generate_automl_csv
+        List of (local) image paths to use for generating the CSV.
+        Paths are expected to conform to the following format:
+            <some-path>/{train,test}/<label>/<something>.jpg
+    output_path
+        Output path to write the CSV to.
+    bucket_name
+        Bucket name to prepend to image paths.
+    """
+
+    ml_use_map = {"train": "TRAINING", "test": "TEST"}
+
+    def parse_image_path(image_path):
+        """Parses an image path into ml_use, image URL and label components."""
+        items = str(image_path).split("/")
+
+        ml_use = ml_use_map[items[-3]]
+        gcs_path = f"gs://{bucket_name}/{'/'.join(items[-3:])}"
+        label = items[-2]
+
+        return ml_use, gcs_path, label
+
+    with open(output_path, "w", encoding="utf-8") as file_:
+        writer = csv.writer(file_, quoting=csv.QUOTE_MINIMAL)
+
+        for image_path in image_paths:
+            try:
+                ml_use, gcs_path, label = parse_image_path(image_path)
+                writer.writerow([ml_use, gcs_path, label])
+            except KeyError:
+                # Ignore rows that don't match the ml_use_map.
+                pass

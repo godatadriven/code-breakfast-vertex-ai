@@ -72,7 +72,7 @@ def save_validation_images(target_dir: Path, x, y, labels, n_per_label: int):
         results.append(
             {
                 "filename": filename,
-                "label": label,
+                "label": REVERSE_MAPPING[label],
             }
         )
 

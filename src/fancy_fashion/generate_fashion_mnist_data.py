@@ -77,7 +77,7 @@ def save_validation_images(target_dir: Path, x, y, labels, n_per_label: int):
         )
 
     df = pd.DataFrame(results)
-    df.to_parquet(TARGET_DIR / "validation.csv")
+    df.to_parquet(TARGET_DIR / "validation.parquet")
 
 
 if __name__ == "__main__":

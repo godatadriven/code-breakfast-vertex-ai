@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 from tensorflow.keras import Model, layers, preprocessing
 from tensorflow.keras.applications import MobileNet
 
@@ -68,3 +69,16 @@ def generate_predictions(model, predict_data_dir):
         {"filename": filename.split("/")[-1], "prediction": pred}
         for filename, pred in zip(predict_data.file_paths, predictions.argmax(axis=1))
     ]
+
+
+def generate_prediction(model, image_file):
+    """Generates prediction for image data provided by a post api request"""
+
+    img = preprocessing.image.load_img(image_file, target_size=(128, 128))
+    # Convert image to numpy array
+    predict_data = preprocessing.image.img_to_array(img)
+    # Convert to batched dataset (array of images)
+    predict_data = np.expand_dims(predict_data, axis=0)
+    prediction = model.predict(predict_data)
+
+    return prediction

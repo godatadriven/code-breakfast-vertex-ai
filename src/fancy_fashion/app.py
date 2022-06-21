@@ -10,18 +10,8 @@ from prometheus_client import Counter, Histogram, generate_latest
 
 from src.fancy_fashion.dataset import LABEL_MAPPING
 from src.fancy_fashion.model import generate_prediction
-from google.cloud import storage
 
 app = FastAPI()
-
-storage_client = storage.Client()
-file_data = 'pipelines/1035892568606/fancy-fashion-joost-20220609121407/train_1001263666764447744/model/model.pkl'
-bucket_name = 'gdd-vertex-fashion-artifacts'
-temp_file_name = 'model.pkl'
-bucket = storage_client.get_bucket(bucket_name)
-blob = bucket.get_blob(file_data)
-blob.download_to_filename(temp_file_name)
-
 model = joblib.load("./model.pkl")
 
 REQUEST_LATENCY = Histogram(
@@ -30,8 +20,15 @@ REQUEST_LATENCY = Histogram(
     labelnames=["model_version"],
 )
 
+PREDICTION_CONFIDENCE = Histogram(
+    "prediction_confidence",
+    "Confidence score of best label match.",
+    labelnames=["model_version", "predicted_label"],
+    buckets=[0, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 0.75, 0.8, 0.9, 0.95, 0.975, 0.99, 1]
+)
+
 REQUEST_COUNT = Counter(
-    "request_count", "Total number of requests", labelnames=["model_version"]
+    "request_count", "Total number of requests", labelnames=["model_version", "predicted_label"]
 )
 
 
@@ -50,13 +47,16 @@ def metrics():
 @time(REQUEST_LATENCY.labels(model_version="random"))  # async time functionality
 async def predict(image_data: UploadFile):
     """Predict endpoint, which produces prediction for a given image."""
-    REQUEST_COUNT.labels(model_version="random").inc()
     name = image_data.filename
     raw_image_data = image_data.file.read()
     img = io.BytesIO(raw_image_data)
     confidence = generate_prediction(model, img)[0]
     prediction = confidence.argmax(axis=0)
+    pred_confidence = confidence.max(axis=0)
     prediction_txt = LABEL_MAPPING.get(prediction)
     confidence_scores = {LABEL_MAPPING.get(i): float(confidence[i]) for i in range(confidence.shape[0])}
+
+    REQUEST_COUNT.labels(model_version="random", predicted_label=prediction_txt).inc()
+    PREDICTION_CONFIDENCE.labels(model_version="random", predicted_label=prediction_txt).observe(pred_confidence)
 
     return {name: {"best_match": prediction_txt, "confidence": confidence_scores}}

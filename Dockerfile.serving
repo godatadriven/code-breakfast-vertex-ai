@@ -24,6 +24,6 @@ ENV PATH=/app/.venv/bin:$PATH
 
 COPY model.pkl /app/model.pkl
 
-ENTRYPOINT ["uvicorn", "fancy_fashion.app:app", "--host", "0.0.0.0", "--reload", "--port", "8080"]
+ENTRYPOINT ["uvicorn", "fancy_fashion.app:app", "--host", "0.0.0.0", "--port", "8080"]
 
 EXPOSE 8080

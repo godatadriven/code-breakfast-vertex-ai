@@ -9,12 +9,13 @@ steps:
         "build",
         "-f",
         "Dockerfile.serving",
-        -t",
-        "gcr.io/$PROJECT_ID/$_IMAGE_NAME",
+        "-t",
+        "$_RUN_REGION-docker.pkg.dev/$PROJECT_ID/docker/fancy-fashion-serving-$_USER_NAME",
         ".",
       ]
   - name: "gcr.io/cloud-builders/docker"
-    args: ["push", "gcr.io/$PROJECT_ID/$_IMAGE_NAME"]
+    args: ["push", "$_RUN_REGION-docker.pkg.dev/$PROJECT_ID/docker/fancy-fashion-serving-$_USER_NAME"]
+
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: gcloud
     args:
@@ -23,15 +24,18 @@ steps:
         "deploy",
         "$_RUN_SERVICE_NAME",
         "--image",
-        "gcr.io/$PROJECT_ID/$_IMAGE_NAME",
+        "$_RUN_REGION-docker.pkg.dev/$PROJECT_ID/docker/fancy-fashion-serving-$_USER_NAME",
         "--region",
         "$_RUN_REGION",
       ]
+      
 images:
-  - gcr.io/$PROJECT_ID/$_IMAGE_NAME
+  - $_RUN_REGION-docker.pkg.dev/$PROJECT_ID/docker/fancy-fashion-serving-$_USER_NAME
+
+timeout: 900s
 
 substitutions:
   _MODEL_PATH: "input"
-  _IMAGE_NAME: "fancy_fashion_api"
+  _USER_NAME: "no-username"
   _RUN_SERVICE_NAME: "expose-api"
   _RUN_REGION: "europe-west1"
